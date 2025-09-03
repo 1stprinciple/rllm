@@ -1,6 +1,6 @@
 {
   "apigen_mt": {
-    "train": "/dataset/train.parquet",
-    "test": "/dataset/validation.parquet"
+    "train": "/Users/tianyi/fireworks/rllm/rllm/data/datasets/apigen_mt/train.parquet",
+    "test": "/Users/tianyi/fireworks/rllm/rllm/data/datasets/apigen_mt/test.parquet"
   }
 }
