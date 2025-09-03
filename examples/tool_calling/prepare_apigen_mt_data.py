@@ -5,9 +5,9 @@ from datasets import load_dataset
 from rllm.data.dataset import DatasetRegistry
 
 
-def prepare_deepcoder_data(train_size: int = None, test_size: int = None):
-    train_dataset = load_dataset("agentica-org/DeepCoder-Preview-Dataset", name="lcbv5", split="train")
-    test_dataset = load_dataset("agentica-org/DeepCoder-Preview-Dataset", name="lcbv5", split="test")
+def prepare_apigen_mt_data(train_size: int = None, test_size: int = None):
+    train_dataset = load_dataset("/datasets/train/", name="lcbv5", split="train")
+    test_dataset = load_dataset("/datasets/test/", name="lcbv5", split="test")
 
     def preprocess_fn(messages, idx):
         return {"prompt": question, "ground_truth": tests, "data_source": "apigen_mt_5k", "uid": f"apigen_mt_5k_{idx}", "index": idx}
