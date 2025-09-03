@@ -5,7 +5,6 @@ from model outputs and evaluates them against ground truth using AST matching.
 import json
 from collections import Counter
 
-from rllm.globals import THOUGHT_DELIMITER_END
 from rllm.parser.tool_parser.tool_parser_base import ToolParser
 from rllm.parser import get_tool_parser
 

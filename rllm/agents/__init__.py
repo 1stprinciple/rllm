@@ -1,7 +1,8 @@
 from rllm.agents.math_agent import MathAgent
 from rllm.agents.tool_agent import ToolAgent
+from rllm.agents.tool_ast_agent import ToolASTAgent
 
-__all__ = ["MathAgent", "ToolAgent"]
+__all__ = ["MathAgent", "ToolAgent", "ToolASTAgent"]
 
 
 def safe_import(module_path, class_name):
