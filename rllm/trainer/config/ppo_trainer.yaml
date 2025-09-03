@@ -429,3 +429,19 @@ ray_kwargs:
   ray_init:
     num_cpus: null
   timeline_json_file: null
+# RLLM Agent Config
+env:
+  name: custom
+  env_args: {}
+
+agent:
+  name: miniwobagent
+  max_steps: 20
+  async_engine: True
+  trajectory_timeout: null
+  overlong_filter: False
+  normalize_step_advantage: False
+  use_stepwise_advantage: False
+  stepwise_advantage_mode: "broadcast"
+  agent_args: {}
+  engine_args: {}
