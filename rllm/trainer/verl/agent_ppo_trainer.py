@@ -12,6 +12,7 @@ from threading import Thread
 import numpy as np
 import torch
 from omegaconf import OmegaConf
+from contextlib import contextmanager
 
 from rllm.engine.agent_execution_engine import AsyncAgentExecutionEngine
 from verl import DataProto
@@ -22,13 +23,19 @@ from verl.trainer.ppo.ray_trainer import (
     ResourcePoolManager,
     Role,
     WorkerType,
-    _timer,
     compute_advantage,
     compute_data_metrics,
     compute_response_mask,
     compute_timing_metrics,
     reduce_metrics,
 )
+from codetiming import Timer
+
+@contextmanager
+def _timer(name: str, timing_raw: dict[str, float]):
+    with Timer(name=name, logger=None) as timer:
+        yield
+    timing_raw[name] = timer.last
 
 
 class AgentPPOTrainer(RayPPOTrainer):

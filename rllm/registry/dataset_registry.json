@@ -1,0 +1,6 @@
+{
+  "apigen_mt": {
+    "train": "/workspace/rllm/rllm/data/datasets/apigen_mt/train.parquet",
+    "test": "/workspace/rllm/rllm/data/datasets/apigen_mt/test.parquet"
+  }
+}
