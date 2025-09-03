@@ -1,6 +1,6 @@
 import copy
 from typing import Any
-
+import json
 from rllm.agents.agent import Action, BaseAgent, Step, Trajectory
 
 
@@ -19,6 +19,7 @@ class ToolASTAgent(BaseAgent):
         self.accumulate_thinking = accumulate_thinking
 
     def update_from_env(self, observation: Any, reward: float, done: bool, info: dict, **kwargs):
+        observation = json.loads(observation)
         if not self.trajectory.steps:
             # Initial problem presentation
             assert isinstance(observation, dict) and "prompt" in observation
