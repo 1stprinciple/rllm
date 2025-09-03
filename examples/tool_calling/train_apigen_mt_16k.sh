@@ -12,7 +12,7 @@ RLLM_DIR=$(python3 -c "import rllm; import os; print(os.path.dirname(os.path.dir
 
 MODEL_PATH=Qwen/Qwen3-4B-Instruct-2507
 
-python3 -m examples.deepcoder.train_apigen_mt \
+python3 -m examples.tool_calling.train_apigen_mt \
     algorithm.adv_estimator=grpo \
     data.train_batch_size=128 \
     data.val_batch_size=512 \
