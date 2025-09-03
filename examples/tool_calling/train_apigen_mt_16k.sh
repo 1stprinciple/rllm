@@ -42,6 +42,7 @@ python3 -m examples.tool_calling.train_apigen_mt \
     actor_rollout_ref.rollout.tensor_model_parallel_size=2 \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.mode="async" \
+    # actor_rollout_ref.rollout.chat_scheduler=verl.schedulers.completions_scheduler.CompletionsScheduler \
     actor_rollout_ref.rollout.enforce_eager=False \
     actor_rollout_ref.rollout.temperature=1 \
     actor_rollout_ref.rollout.top_p=0.95 \
@@ -54,6 +55,8 @@ python3 -m examples.tool_calling.train_apigen_mt \
     actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=1 \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
     algorithm.kl_ctrl.kl_coef=0.001 \
+    algorithm.mask_truncated_samples=True \
+    algorithm.clip_advantages=False \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
     trainer.project_name='rllm-apigen_mt_16k' \
