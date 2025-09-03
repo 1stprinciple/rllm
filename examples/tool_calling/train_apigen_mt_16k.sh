@@ -58,6 +58,7 @@ python3 -m examples.tool_calling.train_apigen_mt \
     algorithm.mask_truncated_samples=True \
     algorithm.clip_advantages=False \
     trainer.critic_warmup=0 \
+    trainer.device=cuda \
     trainer.logger=['console','wandb'] \
     trainer.project_name='rllm-apigen_mt_16k' \
     trainer.experiment_name='rllm-apigen-mt-16k-stage1' \
