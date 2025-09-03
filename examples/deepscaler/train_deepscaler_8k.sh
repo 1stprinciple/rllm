@@ -13,7 +13,7 @@ MODEL_PATH=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
 
 python3 -m examples.deepscaler.train_deepscaler \
     algorithm.adv_estimator=grpo \
-    data.train_batch_size=128 \
+    data.train_batch_size=16 \
     data.val_batch_size=30 \
     data.max_prompt_length=2048 \
     data.max_response_length=8192 \
@@ -22,9 +22,9 @@ python3 -m examples.deepscaler.train_deepscaler \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.actor.loss_agg_mode=seq-mean-token-mean \
-    actor_rollout_ref.actor.ppo_mini_batch_size=64 \
+    actor_rollout_ref.actor.ppo_mini_batch_size=16 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
-    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=30000 \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=16384 \
     actor_rollout_ref.actor.use_kl_loss=False \
     actor_rollout_ref.actor.clip_ratio_high=0.28 \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
