@@ -22,13 +22,13 @@ from verl.trainer.ppo.ray_trainer import (
     ResourcePoolManager,
     Role,
     WorkerType,
-    Timer,
     compute_advantage,
     compute_data_metrics,
     compute_response_mask,
     compute_timing_metrics,
     reduce_metrics,
 )
+from codetiming import Timer
 
 
 class AgentPPOTrainer(RayPPOTrainer):
