@@ -153,6 +153,7 @@ actor_rollout_ref:
     disable_logging: True # Disable logging for vLLM async rollout.
 
 critic:
+  enable: False
   rollout_n: ${actor_rollout_ref.rollout.n}
   strategy: fsdp # [fsdp, fsdp2]
   optim:
