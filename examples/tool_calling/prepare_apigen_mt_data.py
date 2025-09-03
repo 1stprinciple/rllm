@@ -28,7 +28,7 @@ def prepare_apigen_mt_data(train_size: int = None, test_size: int = None):
 
 
 if __name__ == "__main__":
-    train_dataset, test_dataset = prepare_deepcoder_data()
+    train_dataset, test_dataset = prepare_apigen_mt_data(train_size=1000, test_size=20)
     print(f"  - Train dataset: {len(train_dataset.get_data())} examples")
     print(f"  - Test dataset: {len(test_dataset.get_data())} examples")
     print(train_dataset.get_data()[0])

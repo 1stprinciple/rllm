@@ -12,6 +12,7 @@ from threading import Thread
 import numpy as np
 import torch
 from omegaconf import OmegaConf
+from contextlib import contextmanager
 
 from rllm.engine.agent_execution_engine import AsyncAgentExecutionEngine
 from verl import DataProto
@@ -29,6 +30,12 @@ from verl.trainer.ppo.ray_trainer import (
     reduce_metrics,
 )
 from codetiming import Timer
+
+@contextmanager
+def _timer(name: str, timing_raw: dict[str, float]):
+    with Timer(name=name, logger=None) as timer:
+        yield
+    timing_raw[name] = timer.last
 
 
 class AgentPPOTrainer(RayPPOTrainer):
@@ -176,7 +183,7 @@ class AgentPPOTrainer(RayPPOTrainer):
                     "agent_rollout": True,  # no need to generate multiple ones since environment is repeated already
                 }
 
-                with Timer("step", timing_raw):
+                with _timer("step", timing_raw):
                     self.init_envs_and_agents(batch)
 
                     if self.config.agent.use_stepwise_advantage:
@@ -195,11 +202,11 @@ class AgentPPOTrainer(RayPPOTrainer):
 
                     # compute values
                     if self.use_critic:
-                        with Timer("values", timing_raw):
+                        with _timer("values", timing_raw):
                             values = self.critic_wg.compute_values(batch)
                             batch = batch.union(values)
 
-                    with Timer("adv", timing_raw):
+                    with _timer("adv", timing_raw):
                         # compute scores using reward model and/or reward function
                         if self.use_rm:
                             reward_tensor = self.rm_wg.compute_rm_score(batch)
@@ -312,13 +319,13 @@ class AgentPPOTrainer(RayPPOTrainer):
                                 batch = batch[size_mask]
 
                         # recompute old_log_probs
-                        with Timer("old_log_prob", timing_raw):
+                        with _timer("old_log_prob", timing_raw):
                             old_log_prob = self.actor_rollout_wg.compute_log_prob(batch)
                             batch = batch.union(old_log_prob)
 
                         if self.use_reference_policy:
                             # compute reference log_prob
-                            with Timer("ref", timing_raw):
+                            with _timer("ref", timing_raw):
                                 ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
                                 batch = batch.union(ref_log_prob)
 
@@ -383,7 +390,7 @@ class AgentPPOTrainer(RayPPOTrainer):
 
                     # update critic
                     if self.use_critic:
-                        with Timer("update_critic", timing_raw):
+                        with _timer("update_critic", timing_raw):
                             critic_output = self.critic_wg.update_critic(batch)
                         critic_output_metrics = reduce_metrics(critic_output.meta_info["metrics"])
                         metrics.update(critic_output_metrics)
@@ -391,19 +398,19 @@ class AgentPPOTrainer(RayPPOTrainer):
                     # implement critic warmup
                     if self.config.trainer.critic_warmup <= self.global_steps:
                         # update actor
-                        with Timer("update_actor", timing_raw):
+                        with _timer("update_actor", timing_raw):
                             actor_output = self.actor_rollout_wg.update_actor(batch)
                         actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
                         metrics.update(actor_output_metrics)
 
                     # validate
                     if self.val_reward_fn is not None and self.config.trainer.test_freq > 0 and self.global_steps % self.config.trainer.test_freq == 0:
-                        with Timer("testing", timing_raw):
+                        with _timer("testing", timing_raw):
                             val_metrics: dict = self._validate_agent()
                         metrics.update(val_metrics)
 
                     if self.config.trainer.save_freq > 0 and self.global_steps % self.config.trainer.save_freq == 0:
-                        with Timer("save_checkpoint", timing_raw):
+                        with _timer("save_checkpoint", timing_raw):
                             self._save_checkpoint()
 
                 # collect metrics
@@ -517,7 +524,7 @@ class AgentPPOTrainer(RayPPOTrainer):
         """
         if timing_raw is None:
             timing_raw = {}
-        with Timer("collect_trajectory", timing_raw):
+        with _timer("collect_trajectory", timing_raw):
             trajectories = []
             if self.config.agent.async_engine:
                 gen_seq_generator = self.generate_agent_trajectories_async(timing_raw=timing_raw, meta_info=meta_info, mode="Token")
@@ -529,7 +536,7 @@ class AgentPPOTrainer(RayPPOTrainer):
         # Sort trajectories by their idx, to ensure they are in order.
         trajectories.sort(key=lambda x: x["idx"])
 
-        with Timer("transform_trajectory", timing_raw):
+        with _timer("transform_trajectory", timing_raw):
             # Transform the raw trajectories into DataProto format.
             final_gen_batch_output, metrics = self._transform_agent_trajectories(trajectories)
         return final_gen_batch_output, metrics
@@ -546,7 +553,7 @@ class AgentPPOTrainer(RayPPOTrainer):
             timing_raw = {}
         if uids is None:
             uids = []
-        with Timer("collect_trajectory", timing_raw):
+        with _timer("collect_trajectory", timing_raw):
             steps = []
             if self.config.agent.async_engine:
                 gen_seq_generator = self.generate_agent_trajectories_async(timing_raw=timing_raw, meta_info=meta_info, mode="Step")
@@ -558,7 +565,7 @@ class AgentPPOTrainer(RayPPOTrainer):
         # Sort trajectories by their idx, to ensure they are in order.
         steps.sort(key=lambda x: x["idx"])
 
-        with Timer("transform_trajectory", timing_raw):
+        with _timer("transform_trajectory", timing_raw):
             # Transform the raw trajectories into DataProto format.
             final_gen_batch_output = self._transform_agent_steps(steps, uids=uids)
         return final_gen_batch_output
