@@ -144,7 +144,7 @@ actor_rollout_ref:
       temperature: 0
       n: 1
       do_sample: False # default eager for validation
-    multi_turn: 
+    multi_turn:
       enable: False  # should set rollout.name to sglang_async if True
       max_turns: null  # null for no limit (default max_length // 3)
       tool_config_path: null  # null for no tool
@@ -255,6 +255,7 @@ algorithm:
   clip_advantages: False
 
 trainer:
+  device: cuda
   balance_batch: True
   total_epochs: 30
   total_training_steps: null
@@ -301,6 +302,6 @@ agent:
   overlong_filter: False
   normalize_step_advantage: False
   use_stepwise_advantage: False
-  stepwise_advantage_mode: "broadcast" 
+  stepwise_advantage_mode: "broadcast"
   agent_args: {}
   engine_args: {}
