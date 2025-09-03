@@ -42,7 +42,6 @@ python3 -m examples.tool_calling.train_apigen_mt \
     actor_rollout_ref.rollout.tensor_model_parallel_size=2 \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.mode="async" \
-    actor_rollout_ref.rollout.chat_scheduler=verl.schedulers.completions_scheduler.CompletionsScheduler \
     actor_rollout_ref.rollout.enforce_eager=False \
     actor_rollout_ref.rollout.temperature=1 \
     actor_rollout_ref.rollout.top_p=0.95 \
