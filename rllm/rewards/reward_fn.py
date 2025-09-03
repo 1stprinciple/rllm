@@ -1,6 +1,7 @@
 from typing import Protocol, runtime_checkable
 
 from rllm.rewards.code_reward import RewardCodeFn
+from rllm.rewards.tool_calling_ast_reward import RewardToolCallingASTFn
 from rllm.rewards.math_reward import RewardMathFn
 from rllm.rewards.reward_types import RewardConfig, RewardInput, RewardOutput
 from rllm.rewards.search_reward import RewardSearchFn
@@ -90,3 +91,20 @@ def code_reward_fn(task_info: dict, action: str) -> RewardOutput:
     reward_config = RewardConfig()
     reward_fn = RewardCodeFn(reward_config)
     return reward_fn(task_info, action)
+
+
+def tool_calling_ast_reward_fn(task_info: dict, action: str) -> RewardOutput:
+    """
+    A reward function for tool calling AST matching tasks that implements the RewardFunction protocol.
+
+    Args:
+        task: The task dictionary containing data_source, ground_truth and other metadata
+        action: The agent's response/solution
+
+    Returns:
+        float: The calculated reward value based on AST matching
+    """
+    reward_config = RewardConfig()
+    reward_fn = RewardToolCallingASTFn(reward_config)
+    return reward_fn(task_info, action)
+

@@ -171,7 +171,18 @@ class QwenChatTemplateParser(ChatTemplateParser):
         return self.user_token + message["content"] + self.eot_token
 
     def parse_assistant(self, message):
-        result = self.assistant_token + message["content"] + self.eot_token
+        tool_call_str = ""
+        if "tool_calls" in message:
+            # if there are tool calls, we need to insert them into the assistant message
+            for tool_call in message["tool_calls"]:
+                tool_call = tool_call["function"]
+                tool_call_name = tool_call["name"]
+                tool_call_arguments = tool_call["arguments"]
+                tool_call_prefix = '<tool_call>\n{\"name\": \"'
+                tool_call_mid = '\", \"arguments\": '
+                tool_call_suffix = '}\n</tool_call>'
+                tool_call_str += tool_call_prefix + tool_call_name + tool_call_mid + tool_call_arguments + tool_call_suffix
+        result = self.assistant_token + message.get("content", "") + tool_call_str + self.eot_token
         return result
 
     def parse_tool(self, message):

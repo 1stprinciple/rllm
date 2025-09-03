@@ -1,6 +1,6 @@
-from rllm.tools.code_tools import (
-    PythonInterpreter,
-)
+# from rllm.tools.code_tools import (
+#     PythonInterpreter,
+# )
 from rllm.tools.registry import ToolRegistry
 from rllm.tools.web_tools import (
     FirecrawlTool,
@@ -11,7 +11,7 @@ from rllm.tools.web_tools import (
 
 # Define default tools dict
 DEFAULT_TOOLS = {
-    "python": PythonInterpreter,
+    # "python": PythonInterpreter,
     "google_search": GoogleSearchTool,
     "firecrawl": FirecrawlTool,
     "tavily_extract": TavilyExtractTool,
