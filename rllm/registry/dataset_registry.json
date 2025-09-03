@@ -1,0 +1,6 @@
+{
+  "apigen_mt": {
+    "train": "/dataset/train.parquet",
+    "test": "/dataset/validation.parquet"
+  }
+}
