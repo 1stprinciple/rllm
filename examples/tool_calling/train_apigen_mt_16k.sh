@@ -59,8 +59,8 @@ python3 -m examples.tool_calling.train_apigen_mt \
     algorithm.clip_advantages=False \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
-    trainer.project_name='rllm-apigen_mt_16k' \
-    trainer.experiment_name='rllm-apigen-mt-16k-stage2' \
+    trainer.project_name='rllm-apigen_mt_8b_16k' \
+    trainer.experiment_name='rllm-apigen-mt-16k-8b-stage1' \
     trainer.val_before_train=True \
     trainer.n_gpus_per_node=8 \
     trainer.nnodes=1 \
