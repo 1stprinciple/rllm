@@ -11,24 +11,25 @@ export VLLM_ENGINE_ITERATION_TIMEOUT_S=1000000000
 RLLM_DIR=$(python3 -c "import rllm; import os; print(os.path.dirname(os.path.dirname(rllm.__file__)))")
 
 MODEL_PATH=Qwen/Qwen3-8B
+TRAIN_BATCH_SIZE=32
 
 python3 -m examples.tool_calling.train_apigen_mt \
     algorithm.adv_estimator=grpo \
-    data.train_batch_size=64 \
+    data.train_batch_size=$TRAIN_BATCH_SIZE \
     data.val_batch_size=512 \
     data.max_prompt_length=16384 \
-    data.max_response_length=16384 \
+    data.max_response_length=8192 \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.hybrid_engine=True \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
     actor_rollout_ref.actor.loss_agg_mode=seq-mean-token-mean \
-    actor_rollout_ref.actor.ppo_mini_batch_size=64 \
-    actor_rollout_ref.actor.ppo_micro_batch_size=64 \
+    actor_rollout_ref.actor.ppo_mini_batch_size=$TRAIN_BATCH_SIZE \
+    actor_rollout_ref.actor.ppo_micro_batch_size=$TRAIN_BATCH_SIZE \
     actor_rollout_ref.actor.ppo_epochs=1 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
-    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768 \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=24576 \
     actor_rollout_ref.actor.use_kl_loss=False \
     actor_rollout_ref.actor.kl_loss_coef=0.0001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
