@@ -17,9 +17,7 @@ import time
 
 import httpx
 import ray
-from verl.experimental.fully_async_policy.fully_async_trainer import (
-    FullyAsyncTrainer as VerlFullyAsyncTrainer,
-)
+from verl.experimental.fully_async_policy.ray_trainer import FullyAsyncRayPPOTrainer
 from verl.single_controller.ray import RayClassWithInitArgs, RayWorkerGroup
 from verl.trainer.ppo.ray_trainer import ResourcePoolManager
 from verl.trainer.ppo.utils import Role, WorkerType
@@ -27,7 +25,7 @@ from verl.utils.net_utils import get_free_port
 
 
 @ray.remote(num_cpus=10, max_concurrency=100)
-class InferenceManager(VerlFullyAsyncTrainer):
+class InferenceManager(FullyAsyncRayPPOTrainer):
     """
     Manages SGLang inference servers for async training.
     Responsible for:
@@ -124,9 +122,7 @@ class InferenceManager(VerlFullyAsyncTrainer):
     async def _init_async_rollout_manager(self):
         # create async rollout manager and request scheduler
         assert self.config.actor_rollout_ref.rollout.mode == "async"
-        from verl.experimental.fully_async_policy.agent_loop import (
-            FullyAsyncAgentLoopManager,
-        )
+        from verl.experimental.fully_async_policy.agent_loop import FullyAsyncAgentLoopManager
 
         self.async_rollout_mode = True
         self.async_rollout_manager = await FullyAsyncAgentLoopManager.create(
@@ -188,10 +184,6 @@ class InferenceManager(VerlFullyAsyncTrainer):
                 raise RuntimeError(f"Router process exited with code {self.router_process.returncode} before becoming healthy")
             time.sleep(2)
 
-        raise TimeoutError(f"Router at {self.router_url} did not become healthy within {health_check_timeout}s")
-
-    async def clear_kv_cache(self):
-        await self.async_rollout_manager.clear_kv_cache()
         raise TimeoutError(f"Router at {self.router_url} did not become healthy within {health_check_timeout}s")
 
     async def clear_kv_cache(self):
