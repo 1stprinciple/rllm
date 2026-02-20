@@ -64,7 +64,7 @@ sp_size=1
 fsdp_size=8
 
 # Fully async specific parameters
-NNODES=${NNODES:-2}
+NNODES=${NNODES:-1}
 NGPUS_PER_NODE=${NGPUS_PER_NODE:-8}
 
 n_gpus_rollout=4
