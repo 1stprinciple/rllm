@@ -85,7 +85,7 @@ partial_rollout=True
 cd ~/rllm/examples/fully_async
 
 # Launch training using train_dapo_example.py with AsyncAgentTrainer
-PYTHONUNBUFFERED=1 python -m deep_research.train \
+PYTHONUNBUFFERED=1 python -m deepresearch.train \
     data.train_dataset_name=${DATASET_NAME} \
     data.val_dataset_name=${VAL_DATASET_NAME} \
     data.val_files=null \

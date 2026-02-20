@@ -22,9 +22,9 @@ HTTP_SERVER="${SCRIPT_DIR}/browsecomp_http.py"
 
 # Activate browsecomp conda environment and its venv
 BROWSECOMP_DIR="/path/to/BrowseComp-Plus"
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate browsecomp
-source "${BROWSECOMP_DIR}/.venv/bin/activate"
+# source ~/miniconda3/etc/profile.d/conda.sh
+# conda activate browsecomp
+# source "${BROWSECOMP_DIR}/.venv/bin/activate"
 
 # Index paths (BrowseComp-Plus)
 BROWSECOMP_INDEX_DIR="${BROWSECOMP_DIR}/indexes"
