@@ -22,17 +22,29 @@ import ray
 from omegaconf import OmegaConf
 from tqdm import tqdm
 from verl import DataProto
-from verl.experimental.fully_async_policy.ray_trainer import FullyAsyncRayPPOTrainer
+from verl.experimental.fully_async_policy.fully_async_trainer import (
+    FullyAsyncTrainer as VerlFullyAsyncTrainer,
+)
 from verl.single_controller.ray import RayClassWithInitArgs, RayWorkerGroup
 from verl.trainer.ppo import core_algos
 from verl.trainer.ppo.core_algos import agg_loss
-from verl.trainer.ppo.ray_trainer import ResourcePoolManager, apply_kl_penalty, compute_response_mask
+from verl.trainer.ppo.ray_trainer import (
+    ResourcePoolManager,
+    apply_kl_penalty,
+    compute_response_mask,
+)
 from verl.trainer.ppo.utils import Role, WorkerType, need_critic, need_reference_policy
-from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path, should_save_ckpt_esi
+from verl.utils.checkpoint.checkpoint_manager import (
+    find_latest_ckpt_path,
+    should_save_ckpt_esi,
+)
 from verl.utils.debug import marked_timer
 
 from rllm.experimental.fully_async.message_queue import MessageQueueClient
-from rllm.experimental.fully_async.metric_utils import MetricsAggregator, ValidateMetrics
+from rllm.experimental.fully_async.metric_utils import (
+    MetricsAggregator,
+    ValidateMetrics,
+)
 from rllm.experimental.fully_async.utils import (
     assemble_batch_from_trajectory_group_ls,
     compute_grpo_outcome_advantage,
@@ -41,7 +53,7 @@ from rllm.experimental.fully_async.utils import (
 
 
 @ray.remote(num_cpus=10)
-class FullyAsyncTrainer(FullyAsyncRayPPOTrainer):
+class FullyAsyncTrainer(VerlFullyAsyncTrainer):
     """
     A fully asynchronous PPO trainer that obtains samples from a MessageQueue for training.
     Based on an improved implementation of OneStepOffRayTrainer
@@ -632,7 +644,9 @@ class FullyAsyncTrainer(FullyAsyncRayPPOTrainer):
             # Compute rollout correction weights centrally (once per batch)
             # This corrects for off-policy issues (policy mismatch, model staleness, etc.)
             # Also computes off-policy diagnostic metrics (KL, PPL, etc.)
-            from verl.trainer.ppo.rollout_corr_helper import compute_rollout_correction_and_add_to_batch
+            from verl.trainer.ppo.rollout_corr_helper import (
+                compute_rollout_correction_and_add_to_batch,
+            )
 
             rollout_corr_config = self.config.algorithm.get("rollout_correction", None)
             if rollout_corr_config is not None and "rollout_log_probs" in batch.batch:

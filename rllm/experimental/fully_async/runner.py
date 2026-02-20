@@ -22,7 +22,10 @@ from pprint import pprint
 
 import ray
 from omegaconf import OmegaConf
-from verl.experimental.fully_async_policy.fully_async_main import create_resource_pool_manager, create_role_worker_mapping
+from verl.experimental.fully_async_policy.fully_async_main import (
+    create_resource_pool_manager,
+    create_role_worker_mapping,
+)
 from verl.trainer.ppo.utils import Role
 from verl.utils.fs import copy_to_local
 
@@ -289,6 +292,10 @@ class AsyncAgentTrainer:
         start_time = time.time()
 
         # Create a configured TaskRunner class with rollout_fn baked in
+        task_runner_class = create_task_runner_with_rollout_fn(self.rollout_fn, self.val_rollout_fn)
+        run_ppo(self.config, task_runner_class=task_runner_class)
+
+        print(f"total time: {time.time() - start_time:.2f} seconds")
         task_runner_class = create_task_runner_with_rollout_fn(self.rollout_fn, self.val_rollout_fn)
         run_ppo(self.config, task_runner_class=task_runner_class)
 
