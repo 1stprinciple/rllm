@@ -147,6 +147,7 @@ PYTHONUNBUFFERED=1 python -m deepresearch.train \
     actor_rollout_ref.rollout.mode=${rollout_mode} \
     actor_rollout_ref.actor.fsdp_config.dtype="float16" \
     actor_rollout_ref.rollout.dtype="float16" \
+    +actor_rollout_ref.rollout.engine_kwargs.sglang.attention_backend=flashinfer \
     +actor_rollout_ref.rollout.engine_kwargs.sglang.tool_call_parser=qwen \
     +actor_rollout_ref.rollout.engine_kwargs.sglang.reasoning_parser=qwen3 \
     trainer.logger=['console','wandb'] \

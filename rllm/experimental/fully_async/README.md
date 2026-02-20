@@ -88,7 +88,19 @@ Changes to `verl/workers/actor/dp_actor.py`:
 
 ## Running
 
-TBD
+### GPU compatibility: FlashAttention v3 vs FlashInfer
+
+If you see `AssertionError: FlashAttention v3 Backend requires SM>=80 and SM<=90`, your GPU is outside the FA3 range (e.g., V100, T4, or Blackwell B100/B200). Force FlashInfer:
+
+```bash
++actor_rollout_ref.rollout.engine_kwargs.sglang.attention_backend=flashinfer
+```
+
+Or add to your config YAML under `actor_rollout_ref.rollout.engine_kwargs.sglang`:
+
+```yaml
+attention_backend: flashinfer
+```
 
 ## Configuration
 
