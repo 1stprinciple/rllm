@@ -82,7 +82,7 @@ trigger_parameter_sync_step=1
 require_batches=1
 partial_rollout=True
 
-# cd ~/rllm/examples/fully_async
+cd /workspace/home/rllm/examples/fully_async
 
 # Launch training using train_dapo_example.py with AsyncAgentTrainer
 PYTHONUNBUFFERED=1 python -m deepresearch.train \
