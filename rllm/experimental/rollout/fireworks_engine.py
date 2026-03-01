@@ -16,7 +16,7 @@ _MAX_SAMPLE_ATTEMPTS = 5
 _TRANSIENT_ERROR_CODES = ("502", "503", "425", "Connection")
 
 
-class FiretitanEngine(RolloutEngine):
+class FireworksEngine(RolloutEngine):
     """RolloutEngine implementation using Fireworks DeploymentSampler for inference.
 
     Uses client-side tokenization (via HuggingFace tokenizer + chat template)
