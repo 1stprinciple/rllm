@@ -26,7 +26,15 @@ class FireworksTrainerLauncher(TrainerLauncher):
     def train(self):
         trainer = None
         try:
-            trainer = UnifiedTrainer(backend_cls=FireworksBackend, config=self.config, workflow_class=self.workflow_class, train_dataset=self.train_dataset, val_dataset=self.val_dataset, workflow_args=self.workflow_args, **self.kwargs,)
+            trainer = UnifiedTrainer(
+                backend_cls=FireworksBackend,
+                config=self.config,
+                workflow_class=self.workflow_class,
+                train_dataset=self.train_dataset,
+                val_dataset=self.val_dataset,
+                workflow_args=self.workflow_args,
+                **self.kwargs,
+            )
             trainer.fit()
         except Exception as e:
             print(f"Error training with Fireworks: {e}")

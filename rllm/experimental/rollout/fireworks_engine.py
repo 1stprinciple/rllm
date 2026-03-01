@@ -73,11 +73,7 @@ class FireworksEngine(RolloutEngine):
         self.tokenizer = tokenizer
         self.max_prompt_length = max_prompt_length
         self.max_response_length = max_response_length
-        self.max_model_length = (
-            max_model_length - 1
-            if max_model_length is not None
-            else max_prompt_length + max_response_length - 1
-        )
+        self.max_model_length = max_model_length - 1 if max_model_length is not None else max_prompt_length + max_response_length - 1
         self.accumulate_reasoning = accumulate_reasoning
         self.reasoning_effort = reasoning_effort
 
@@ -201,9 +197,7 @@ class FireworksEngine(RolloutEngine):
         return True
 
     @override
-    async def get_token_output_from_token_input(
-        self, token_input: list[int], **kwargs
-    ):
+    async def get_token_output_from_token_input(self, token_input: list[int], **kwargs):
         """Generate from a pre-tokenized prompt (token-in / token-out path).
 
         Args:

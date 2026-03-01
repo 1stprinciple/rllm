@@ -10,21 +10,16 @@ It does NOT contain any environment or agent logic.
 from __future__ import annotations
 
 import asyncio
-import inspect
 import logging
-from functools import wraps
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any
 
 import tinker
 import torch
 from fireworks.training.cookbook.utils import ReconnectableClient
 from fireworks.training.sdk import (
-    DeploymentManager,
     DeploymentSampler,
-    TrainerJobManager,
     WeightSyncer,
 )
-from omegaconf import OmegaConf
 from tinker.types import AdamParams
 
 from rllm.agents.agent import TrajectoryGroup
@@ -48,6 +43,7 @@ ADV_TO_LOSS_FN_AUTO_MAP = {
     rLLMAdvantageEstimator.GRPO: "ppo",
     rLLMAdvantageEstimator.OTHER: "importance_sampling",
 }
+
 
 class FireworksPolicyTrainer:
     """Handles policy updates via gradient descent using Fireworks Firetitan.
@@ -98,9 +94,7 @@ class FireworksPolicyTrainer:
         self.weight_syncer = weight_syncer
         self.sampler = sampler
 
-        self.cf_config = cf_config or CompactFilteringConfig.from_config(
-            self.config.rllm.compact_filtering
-        )
+        self.cf_config = cf_config or CompactFilteringConfig.from_config(self.config.rllm.compact_filtering)
         self.transform_config = transform_config or TransformConfig()
         self.algorithm_config = algorithm_config or AlgorithmConfig.from_config(self.config)
 
@@ -148,9 +142,7 @@ class FireworksPolicyTrainer:
         logger.info("Resuming from checkpoint: %s", latest_name)
 
         checkpoint_ref = inner.resolve_checkpoint_path(latest_name)
-        await asyncio.to_thread(
-            lambda: self.training_client.load_state_with_optimizer(checkpoint_ref).result()
-        )
+        await asyncio.to_thread(lambda: self.training_client.load_state_with_optimizer(checkpoint_ref).result())
 
         try:
             step = int(latest_name.split("-")[-1])
@@ -243,9 +235,7 @@ class FireworksPolicyTrainer:
             algorithm_config=algorithm_config,
         )
 
-        fwd_bwd_results = await asyncio.gather(
-            *[asyncio.to_thread(lambda f=fut: f.result()) for fut in fwd_bwd_futures]
-        )
+        fwd_bwd_results = await asyncio.gather(*[asyncio.to_thread(lambda f=fut: f.result()) for fut in fwd_bwd_futures])
 
         training_logprobs = []
         for fwd_bwd_result in fwd_bwd_results:
@@ -318,9 +308,7 @@ class FireworksPolicyTrainer:
         )
 
         # Wait for all futures together
-        fwd_bwd_results = await asyncio.gather(
-            *[asyncio.to_thread(lambda f=fut: f.result()) for fut in fwd_bwd_futures]
-        )
+        fwd_bwd_results = await asyncio.gather(*[asyncio.to_thread(lambda f=fut: f.result()) for fut in fwd_bwd_futures])
         await asyncio.to_thread(lambda: optim_future.result())
 
         training_logprobs = []
@@ -350,9 +338,7 @@ class FireworksPolicyTrainer:
         name = f"step-{step}"
 
         if save_dcp:
-            await asyncio.to_thread(
-                lambda: self.training_client.inner.save_state(name).result(timeout=1800)
-            )
+            await asyncio.to_thread(lambda: self.training_client.inner.save_state(name).result(timeout=1800))
             logger.info("DCP checkpoint saved: %s", name)
 
         await self._sync_weights(name)
@@ -361,9 +347,7 @@ class FireworksPolicyTrainer:
     async def save_dcp_checkpoint(self, step: int) -> None:
         """Save a DCP (distributed checkpoint) only, without hot-loading."""
         name = f"step-{step}"
-        await asyncio.to_thread(
-            lambda: self.training_client.inner.save_state(name).result(timeout=1800)
-        )
+        await asyncio.to_thread(lambda: self.training_client.inner.save_state(name).result(timeout=1800))
         logger.info("DCP checkpoint saved: %s", name)
 
     # ------------------------------------------------------------------
@@ -385,7 +369,5 @@ class FireworksPolicyTrainer:
         if self.reference_client is None:
             raise RuntimeError("reference_client not set")
 
-        ref_fwd = await asyncio.to_thread(
-            lambda: self.reference_client.forward(datums, "cross_entropy").result()
-        )
+        ref_fwd = await asyncio.to_thread(lambda: self.reference_client.forward(datums, "cross_entropy").result())
         return [out["logprobs"].data for out in ref_fwd.loss_fn_outputs]

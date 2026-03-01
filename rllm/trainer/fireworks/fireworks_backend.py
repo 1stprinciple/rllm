@@ -18,16 +18,14 @@ from typing import TYPE_CHECKING, Any
 
 import tinker
 import torch
+from fireworks.training.cookbook.utils import create_trainer_job, setup_deployment
 from fireworks.training.sdk import (
     DeploymentManager,
     DeploymentSampler,
     TrainerJobManager,
     WeightSyncer,
 )
-from fireworks.training.sdk.client import (
-    FiretitanServiceClient,
-    FiretitanTrainingClient,
-)
+from fireworks.training.sdk.client import FiretitanServiceClient
 from omegaconf import DictConfig
 from transformers import AutoTokenizer
 
@@ -118,15 +116,35 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
     # BackendProtocol interface methods
     # =========================================================================
 
-    def init_rollout_engine(self, **kwargs) -> RolloutEngine:
-        """Initialize the TinkerEngine rollout engine.
+    def _init_fireworks(
+        self,
+        config: DictConfig,
+        **kwargs,
+    ) -> None:
+        """Initialize Fireworks-specific components."""
+        # This method can be used to initialize any Fireworks-specific components if needed
+        api_key = os.environ["FIREWORKS_API_KEY"]
+        account = os.environ.get("FIREWORKS_ACCOUNT_ID", "")
+        base_url = os.environ.get("FIREWORKS_BASE_URL", "https://api.fireworks.ai")
 
-        Args:
-            **kwargs: Additional arguments, including the various configurations
+        train_job_manager = TrainerJobManager(api_key=api_key, account_id=account, base_url=base_url)
+        deploy_mgr = DeploymentManager(api_key=api_key, account_id=account, base_url=base_url)
 
-        Returns:
-            TinkerEngine: The initialized rollout engine.
-        """
+        deployment_id = config.deployment.deployment_id
+        train_endpoint = create_trainer_job(
+            train_job_manager,
+            base_model=config.model.name,
+            infra=config.training_infra,
+            lora_rank=config.model.lora_rank,
+            max_seq_len=config.training.max_length,
+            learning_rate=config.training.learning_rate,
+            grad_accum=cfg.grad_accum,
+            display_name=config.display_name,
+            hot_load_deployment_id=deployment_id,
+        )
+
+        deployment_info = setup_deployment(deploy_mgr, config.deployment, config.model.name, config.training_infra)
+
         self.policy_trainer = FireworksPolicyTrainer(
             config=self.full_config,
             service_client=self.service_client,
@@ -134,10 +152,44 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
             transform_config=kwargs.get("transform_config"),
             algorithm_config=kwargs.get("algorithm_config"),
         )
-        # we need to get it from `AutoTokenizer` since the `policy_trainer` has not been initialized yet
-        self.tokenizer = AutoTokenizer.from_pretrained(self.full_config.model.name)
 
-        self.rollout_engine = FireworksEngine(base_url=self.full_config.tinker_base_url, model_name=self.full_config.model.name, service_client=self.service_client, tokenizer=self.tokenizer, max_prompt_length=self.full_config.data.max_prompt_length, max_response_length=self.full_config.data.max_response_length, max_model_length=self.full_config.training.max_length, sampling_params=self.full_config.sampling, **self.full_config.rollout_engine)
+        tokenizer = AutoTokenizer.from_pretrained(config.model.name)
+        sampler = DeploymentSampler(
+            inference_url=deploy_mgr.inference_url,
+            model=deployment_info.inference_model,
+            api_key=api_key,
+            tokenizer=tokenizer,
+        )
+
+        weight_syncer = WeightSyncer(
+            policy_client=policy.inner,
+            deploy_mgr=deploy_mgr,
+            deployment_id=deployment_id,
+            base_model=config.model.name,
+            hotload_timeout=config.hotload.hot_load_timeout,
+            first_checkpoint_type=config.hotload.first_checkpoint_type,
+        )
+
+    def init_rollout_engine(self, **kwargs) -> RolloutEngine:
+        """Initialize the FireworksEngine rollout engine.
+
+        Args:
+            **kwargs: Additional arguments, including the various configurations
+
+        Returns:
+            FireworksEngine: The initialized rollout engine.
+        """
+        self.rollout_engine = FireworksEngine(
+            base_url=self.full_config.tinker_base_url,
+            model_name=self.full_config.model.name,
+            service_client=self.service_client,
+            tokenizer=self.tokenizer,
+            max_prompt_length=self.full_config.data.max_prompt_length,
+            max_response_length=self.full_config.data.max_response_length,
+            max_model_length=self.full_config.training.max_length,
+            sampling_params=self.full_config.sampling,
+            **self.full_config.rollout_engine,
+        )
         return self.rollout_engine
 
     def validate_config(self) -> None:
@@ -342,7 +394,7 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
     ) -> None:
         """Update the policy via optimizer step.
 
-        For Tinker, this performs the optimizer step after forward-backward.
+        For Fireworks/Tinker, this performs the optimizer step after forward-backward.
 
         Args:
             trainer_state: The trainer state.

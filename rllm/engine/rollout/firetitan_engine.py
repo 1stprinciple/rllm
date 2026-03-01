@@ -64,11 +64,7 @@ class FiretitanEngine(RolloutEngine):
         self.tokenizer = tokenizer
         self.max_prompt_length = max_prompt_length
         self.max_response_length = max_response_length
-        self.max_model_length = (
-            max_model_length - 1
-            if max_model_length is not None
-            else max_prompt_length + max_response_length - 1
-        )
+        self.max_model_length = max_model_length - 1 if max_model_length is not None else max_prompt_length + max_response_length - 1
         self.default_sampling_params = sampling_params or {}
         self.accumulate_reasoning = accumulate_reasoning
         self.reasoning_effort = reasoning_effort
@@ -192,18 +188,14 @@ class FiretitanEngine(RolloutEngine):
         completion_ids: list[int] = list(sampled.full_tokens[sampled.prompt_len :])
         prompt_length = sampled.prompt_len
 
-        if enforce_max_prompt_length and (
-            prompt_length > self.max_prompt_length or prompt_length > self.max_model_length
-        ):
+        if enforce_max_prompt_length and (prompt_length > self.max_prompt_length or prompt_length > self.max_model_length):
             raise TerminationEvent(TerminationReason.MAX_PROMPT_LENGTH_EXCEEDED)
 
         max_tokens = self._prepare_max_tokens(requested_max_tokens, prompt_length)
         if len(completion_ids) > max_tokens:
             completion_ids = completion_ids[:max_tokens]
 
-        logprobs: list[float] | None = (
-            list(sampled.inference_logprobs) if sampled.inference_logprobs else None
-        )
+        logprobs: list[float] | None = list(sampled.inference_logprobs) if sampled.inference_logprobs else None
         completion_text = sampled.text
         finish_reason = sampled.finish_reason or "stop"
 
