@@ -11,12 +11,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import torch
 
 import tinker
-import torch
 from fireworks.training.cookbook.utils import ReconnectableClient
-from fireworks.training.sdk import DeploymentSampler, WeightSyncer
+from fireworks.training.sdk import WeightSyncer
 from tinker.types import AdamParams
 
 from rllm.agents.agent import TrajectoryGroup
@@ -78,8 +80,6 @@ class FireworksPolicyTrainer:
                 reference model (KL penalty, etc.).
             weight_syncer: ``WeightSyncer`` for pushing checkpoints to
                 the inference deployment.
-            sampler: ``DeploymentSampler`` for inference (returned from
-                ``initialize_async`` for the rollout engine to use).
             cf_config: Compact filtering configuration.
             transform_config: Transform configuration.
             algorithm_config: Algorithm configuration.
