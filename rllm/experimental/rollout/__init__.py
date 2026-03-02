@@ -12,9 +12,9 @@ from .types import (
 )
 
 if TYPE_CHECKING:
+    from .fireworks_engine import FireworksEngine
     from .tinker_engine import TinkerEngine
     from .verl_engine import VerlEngine
-    from .fireworks_engine import FireworksEngine
 
 __all__ = [
     "ModelOutput",
@@ -43,12 +43,9 @@ def __getattr__(name):
         from .verl_engine import VerlEngine as _VerlEngine
 
         return _VerlEngine
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-        from .tinker_engine import TinkerEngine as _TinkerEngine
 
-        return _TinkerEngine
-    if name == "VerlEngine":
-        from .verl_engine import VerlEngine as _VerlEngine
+    if name == "FireworksEngine":
+        from .fireworks_engine import FireworksEngine as _FireworksEngine
 
-        return _VerlEngine
+        return _FireworksEngine
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
