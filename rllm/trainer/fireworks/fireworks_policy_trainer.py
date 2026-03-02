@@ -16,10 +16,7 @@ from typing import Any
 import tinker
 import torch
 from fireworks.training.cookbook.utils import ReconnectableClient
-from fireworks.training.sdk import (
-    DeploymentSampler,
-    WeightSyncer,
-)
+from fireworks.training.sdk import DeploymentSampler, WeightSyncer
 from tinker.types import AdamParams
 
 from rllm.agents.agent import TrajectoryGroup
@@ -68,7 +65,6 @@ class FireworksPolicyTrainer:
         training_client: ReconnectableClient,
         reference_client: ReconnectableClient | None = None,
         weight_syncer: WeightSyncer | None = None,
-        sampler: DeploymentSampler | None = None,
         cf_config: CompactFilteringConfig | None = None,
         transform_config: TransformConfig | None = None,
         algorithm_config: AlgorithmConfig | None = None,
@@ -92,7 +88,6 @@ class FireworksPolicyTrainer:
         self.training_client = training_client
         self.reference_client = reference_client
         self.weight_syncer = weight_syncer
-        self.sampler = sampler
 
         self.cf_config = cf_config or CompactFilteringConfig.from_config(self.config.rllm.compact_filtering)
         self.transform_config = transform_config or TransformConfig()
@@ -330,6 +325,10 @@ class FireworksPolicyTrainer:
         save_dcp: bool = False,
     ) -> None:
         """Save sampler weights, hot-load into deployment, and optionally save a DCP checkpoint.
+
+        After hot-load completes the existing ``DeploymentSampler`` will
+        automatically serve the updated weights on its next request — no
+        new sampler object is needed.
 
         Args:
             step: Current global step.

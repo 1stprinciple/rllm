@@ -9,6 +9,8 @@ fireworks_base_url: "https://api.fireworks.ai"  # Fireworks service URL (null fo
 fuse_forward_backward_and_optim_step: false
 
 display_name: "rl-trainer"  # Display name for the training job in Fireworks dashboard
+account: "rllm-project"
+fireworks_base_url: "https://api.fireworks.ai"  # Fireworks service URL
 
 # Model Configuration
 model:
@@ -26,7 +28,11 @@ training:
   beta2: 0.95
   eps: 1e-8
   max_length: 32768
-  num_minibatches: 1
+
+  max_samples_per_fwd_bwd: 4  # Maximum number of samples (prompts x completions) per forward/backward pass
+  min_samples_per_fwd_bwd: 4  # Minimum number of samples per forward/back
+  completions_per_prompt: 4  # Number of completions to generate per prompt, used to calculate samples per fwd/bwd
+
   default_local_dir: '/tmp/rllm-tinker-checkpoints'
   resume_from_tinker_id: null  # Tinker model ID path to resume from (e.g., tinker://uuid/weights/000060)
 

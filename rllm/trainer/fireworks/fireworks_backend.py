@@ -124,13 +124,15 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
         """Initialize Fireworks-specific components."""
         # This method can be used to initialize any Fireworks-specific components if needed
         api_key = os.environ["FIREWORKS_API_KEY"]
-        account = os.environ.get("FIREWORKS_ACCOUNT_ID", "")
-        base_url = os.environ.get("FIREWORKS_BASE_URL", "https://api.fireworks.ai")
+        account = config.get("account", "rllm-project")
+        base_url = config.get("fireworks_base_url", "https://api.fireworks.ai")
 
         train_job_manager = TrainerJobManager(api_key=api_key, account_id=account, base_url=base_url)
         deploy_mgr = DeploymentManager(api_key=api_key, account_id=account, base_url=base_url)
 
         deployment_id = config.deployment.deployment_id
+        deployment_info = setup_deployment(deploy_mgr, config.deployment, config.model.name, config.training_infra)
+
         train_endpoint = create_trainer_job(
             train_job_manager,
             base_model=config.model.name,
@@ -138,31 +140,28 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
             lora_rank=config.model.lora_rank,
             max_seq_len=config.training.max_length,
             learning_rate=config.training.learning_rate,
-            grad_accum=cfg.grad_accum,
             display_name=config.display_name,
             hot_load_deployment_id=deployment_id,
         )
-
-        deployment_info = setup_deployment(deploy_mgr, config.deployment, config.model.name, config.training_infra)
+        service_client = FiretitanServiceClient(base_url=train_endpoint.base_url, api_key="tml-local")
 
         self.policy_trainer = FireworksPolicyTrainer(
             config=self.full_config,
-            service_client=self.service_client,
+            service_client=service_client,
             cf_config=kwargs.get("cf_config"),
             transform_config=kwargs.get("transform_config"),
             algorithm_config=kwargs.get("algorithm_config"),
         )
 
         tokenizer = AutoTokenizer.from_pretrained(config.model.name)
-        sampler = DeploymentSampler(
+        self.sampler = DeploymentSampler(
             inference_url=deploy_mgr.inference_url,
             model=deployment_info.inference_model,
             api_key=api_key,
             tokenizer=tokenizer,
         )
-
-        weight_syncer = WeightSyncer(
-            policy_client=policy.inner,
+        self.weight_syncer = WeightSyncer(
+            policy_client=self.policy_trainer.inner,
             deploy_mgr=deploy_mgr,
             deployment_id=deployment_id,
             base_model=config.model.name,
@@ -180,7 +179,7 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
             FireworksEngine: The initialized rollout engine.
         """
         self.rollout_engine = FireworksEngine(
-            base_url=self.full_config.tinker_base_url,
+            base_url=self.full_config.fireworks_base_url,
             model_name=self.full_config.model.name,
             service_client=self.service_client,
             tokenizer=self.tokenizer,
