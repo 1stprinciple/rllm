@@ -196,16 +196,16 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
         # Check for recommended sampling parameters
         sampling_params = self.full_config.sampling
         if sampling_params.get("temperature", 1.0) != 1.0 or sampling_params.get("top_p", 1.0) != 1.0:
-            logger.warning("Temperature and top_p are set away from 1.0, this is not recommended by Fireworks and can cause mysterious issues with logprobs. See https://github.com/thinking-machines-lab/tinker-cookbook/pull/86 for discussion.")
+            logger.warning("Temperature and top_p are set away from 1.0, this is not recommended by Tinker and can cause mysterious issues with logprobs. See https://github.com/thinking-machines-lab/tinker-cookbook/pull/86 for discussion.")
 
-        # Validate num_minibatches (currently only support 1)
-        if self.full_config.training.get("num_minibatches", 1) != 1:
-            logger.warning(f"Only num_minibatches=1 is fully tested for FireworksBackend, current num_minibatches={self.full_config.training.num_minibatches}")
+        # # Validate num_minibatches (currently only support 1)
+        # if self.full_config.training.get("num_minibatches", 1) != 1:
+        #     logger.warning(f"Only num_minibatches=1 is fully tested for TinkerBackend, current num_minibatches={self.full_config.training.num_minibatches}")
 
     def get_dataloader(self, dataset: Dataset | None, trainer_state: TrainerState) -> Iterable:
         """Get dataloader for the given dataset.
 
-        For Fireworks, we create standard PyTorch DataLoaders.
+        For FireworksBackend, we create standard PyTorch DataLoaders.
 
         Args:
             dataset: The dataset to create dataloader from.
@@ -215,7 +215,7 @@ class FireworksBackend(BackendProtocol[Iterable, list[tinker.Datum]]):
             DataLoader wrapped dataset.
         """
         if dataset is None:
-            raise ValueError("Dataset cannot be None for TinkerBackend")
+            raise ValueError("Dataset cannot be None for FireworksBackend")
 
         if trainer_state.is_training:
             batch_size = self.full_config.data.train_batch_size
