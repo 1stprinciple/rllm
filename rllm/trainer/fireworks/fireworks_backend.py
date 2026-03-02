@@ -186,10 +186,8 @@ class FireworksBackend(TinkerBackend):
         )
 
         self.rollout_engine = FireworksEngine(
-            inference_url=self.full_config.get("fireworks_base_url", "https://api.fireworks.ai"),
-            model_name=self.full_config.model.name,
-            sampler=self.sampling_client,
             tokenizer=self.tokenizer,
+            sampler=self.sampling_client,
             max_prompt_length=self.full_config.data.max_prompt_length,
             max_response_length=self.full_config.data.max_response_length,
             max_model_length=self.full_config.training.max_length,
